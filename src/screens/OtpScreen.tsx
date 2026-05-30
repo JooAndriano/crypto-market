@@ -59,9 +59,15 @@ async function handleVerify() {
       state.loginMethod ===
       "email"
     ) {
-      navigation.replace(
-        "Market"
-      );
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name:
+                "MainTabs",
+            },
+          ],
+        });
 
       return;
     }
@@ -72,9 +78,16 @@ async function handleVerify() {
       state.token!
     );
 
-    navigation.replace(
-      "Market"
-    );
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name:
+            "MainTabs",
+        },
+      ],
+    });
+
   } catch (error: any) {
       console.log("VERIFY BODY", {
         otp,

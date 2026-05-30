@@ -189,9 +189,15 @@ const fullPhone =
          response.data.token,
      });
      if (isEmail) {
-       navigation.replace(
-         "Market"
-       );
+       navigation.reset({
+         index: 0,
+         routes: [
+           {
+             name:
+               "MainTabs",
+           },
+         ],
+       });
      } else {
        navigation.navigate(
          "OTP"

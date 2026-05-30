@@ -10,8 +10,8 @@ from "../screens/LoginScreen";
 import OtpScreen
 from "../screens/OtpScreen";
 
-import MarketScreen
-from "../screens/MarketScreen";
+import MainTabs
+from "./MainTabs";
 
 import { RootStackParamList }
 from "../types/navigation";
@@ -37,8 +37,8 @@ export default function AppNavigator() {
       />
 
       <Stack.Screen
-        name="Market"
-        component={MarketScreen}
+        name="MainTabs"
+        component={MainTabs}
       />
     </Stack.Navigator>
   );
