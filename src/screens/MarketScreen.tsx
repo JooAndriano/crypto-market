@@ -89,41 +89,50 @@ export default function MarketScreen() {
    }
  }
 
-  const filteredData =
-    useMemo(() => {
-      return market.filter(
-        item => {
-          const searchMatch =
-            item.name
-              ?.toLowerCase()
-              .includes(
-                search.toLowerCase()
-              ) ||
-            item.symbol
-              ?.toLowerCase()
-              .includes(
-                search.toLowerCase()
-              );
+ const filteredData = useMemo(() => {
+   return market.filter(item => {
 
-          const tabMatch =
-            selectedTab === "all"
-              ? true
-              : selectedTab ===
-                "favorite"
-              ? item.isFavorite
-              : true;
+     const searchMatch =
+       item.name
+         ?.toLowerCase()
+         .includes(
+           search.toLowerCase()
+         ) ||
+       item.symbol
+         ?.toLowerCase()
+         .includes(
+           search.toLowerCase()
+         );
 
-          return (
-            searchMatch &&
-            tabMatch
-          );
-        }
-      );
-    }, [
-      market,
-      search,
-      selectedTab,
-    ]);
+     const tabMatch =
+       (() => {
+         switch (selectedTab) {
+           case "crypto":
+             return (
+               item.type ===
+               "cryptocurrency"
+             );
+
+           case "favorite":
+             return (
+               item.isFavorite
+             );
+
+           default:
+             return true;
+         }
+       })();
+
+     return (
+       searchMatch &&
+       tabMatch
+     );
+   });
+ }, [
+   market,
+   search,
+   selectedTab,
+ ]);
 
   return (
     <SafeAreaView
