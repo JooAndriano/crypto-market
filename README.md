@@ -5,9 +5,9 @@ A React Native (Expo) mobile application built for the MIFX technical assessment
 ## Preview
 
 <p style="text-align: center;">
-  <img src="assets/screenshots/login.png" width="30%" alt="Login Screen" />
-  <img src="assets/screenshots/otp.png" width="30%" alt="OTP Screen" />
-  <img src="assets/screenshots/market.png" width="30%" alt="Market Screen" />
+  <img src="prev1.png" width="30%" alt="Login Screen" />
+  <img src="prev2.png" width="30%" alt="OTP Screen" />
+  <img src="prev3.png" width="30%" alt="Market Screen" />
 </p>
 
 ## Features
