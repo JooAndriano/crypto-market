@@ -1,6 +1,21 @@
-import { View, Text } from "react-native";
+import React from "react";
+import { View, Text, Button } from "react-native";
 
-export default function LoginScreen() {
+import { NativeStackScreenProps } from
+"@react-navigation/native-stack";
+
+import { RootStackParamList }
+from "../types/navigation";
+
+type Props =
+  NativeStackScreenProps<
+    RootStackParamList,
+    "Login"
+  >;
+
+export default function LoginScreen({
+  navigation,
+}: Props) {
   return (
     <View
       style={{
@@ -10,6 +25,13 @@ export default function LoginScreen() {
       }}
     >
       <Text>Login Screen</Text>
+
+      <Button
+        title="Go OTP"
+        onPress={() =>
+          navigation.navigate("OTP")
+        }
+      />
     </View>
   );
 }
