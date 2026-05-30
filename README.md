@@ -2,6 +2,14 @@
 
 A React Native (Expo) mobile application built for the MIFX technical assessment.
 
+## Preview
+
+<p style="text-align: center;">
+  <img src="assets/screenshots/login.png" width="30%" alt="Login Screen" />
+  <img src="assets/screenshots/otp.png" width="30%" alt="OTP Screen" />
+  <img src="assets/screenshots/market.png" width="30%" alt="Market Screen" />
+</p>
+
 ## Features
 
 ### Authentication
@@ -255,6 +263,21 @@ Used to persist authentication state and provide a seamless user experience thro
 ### Why Expo?
 
 Expo significantly reduces setup complexity and accelerates development for technical assignments while still supporting production-ready React Native development.
+
+---
+
+# Future Improvements
+
+* Pull To Refresh on Market List
+* Dark Mode
+* Unit Testing
+* API Interceptors for Automatic Token Handling
+* Skeleton Loading States
+* Real-time Market Updates
+* Profile Screen
+* Notification Support
+
+---
 
 # Author
 
