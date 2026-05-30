@@ -197,9 +197,38 @@ const fullPhone =
          "OTP"
        );
      }
-   } catch (error) {
-     console.log(error);
-   }
+   } catch (error: any) {
+       const apiError =
+         error?.response?.data;
+
+       console.log(
+         "LOGIN ERROR",
+         JSON.stringify(
+           apiError,
+           null,
+           2
+         )
+       );
+
+       const field =
+         apiError?.data?.field;
+
+       const message =
+         apiError?.message;
+
+       if (field) {
+         const newErrors = {
+           [field]: message,
+         };
+
+         console.log(
+           "SET ERRORS",
+           newErrors
+         );
+
+         setErrors(newErrors);
+       }
+     }
  }
 
   return (
@@ -243,6 +272,7 @@ const fullPhone =
               placeholder="Enter your phone number"
               onChangeText={setPhone}
               keyboardType="number-pad"
+              error={errors.phone}
               leftComponent={
                 <CountryCode
                   flag={

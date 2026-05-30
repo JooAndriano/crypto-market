@@ -29,6 +29,10 @@ export default function AppInput({
   error,
   leftComponent,
 }: Props) {
+    console.log(
+      "INPUT ERROR",
+      error
+    );
   return (
     <View>
       <View
