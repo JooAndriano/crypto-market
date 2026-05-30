@@ -111,15 +111,6 @@ async function handleLogout() {
   dispatch({
     type: "LOGOUT",
   });
-
-  navigation.reset({
-    index: 0,
-    routes: [
-      {
-        name: "Login",
-      },
-    ],
-  });
 }
 
  const filteredData = useMemo(() => {

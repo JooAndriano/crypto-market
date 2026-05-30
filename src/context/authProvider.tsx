@@ -1,5 +1,6 @@
 import React, {
   useReducer,
+  useEffect,
 } from "react";
 
 import { AuthContext }
@@ -10,6 +11,8 @@ import {
   initialState,
 } from "./authReducer";
 
+import { getToken } from "../utils/storage";
+
 export default function AuthProvider({
   children,
 }: any) {
@@ -18,6 +21,22 @@ export default function AuthProvider({
       authReducer,
       initialState
     );
+
+  useEffect(() => {
+    const bootstrapAsync = async () => {
+      let userToken: string | null = null;
+
+      try {
+        userToken = await getToken();
+      } catch (e) {
+        // Restoring token failed
+      }
+
+      dispatch({ type: "RESTORE_TOKEN", token: userToken });
+    };
+
+    bootstrapAsync();
+  }, []);
 
   return (
     <AuthContext.Provider

@@ -146,59 +146,35 @@ const fullPhone =
          );
      }
 
-     await saveToken(
-       response.data.token
-     );
-
-     dispatch({
-       type: "LOGIN_SUCCESS",
-       payload: {
-         token: response.data.token,
-         otp: response.data.otp,
-         phone: isEmail
-           ? ""
-           : fullPhone,
-         email,
-         loginMethod: isEmail
-           ? "email"
-           : "phone",
-       },
-     });
-     console.log("SAVED STATE");
-
-     console.log({
-       phone: isEmail
-         ? ""
-         : fullPhone,
-       email,
-       otp: response.data.otp,
-     });
-
-     console.log(
-       JSON.stringify(
-         response.data,
-         null,
-         2
-       )
-     );
-     console.log({
-       phone: fullPhone,
-       otp:
-         response.data.otp,
-       token:
-         response.data.token,
-     });
      if (isEmail) {
-       navigation.reset({
-         index: 0,
-         routes: [
-           {
-             name:
-               "MainTabs",
-           },
-         ],
+       await saveToken(
+         response.data.token
+       );
+
+       dispatch({
+         type: "LOGIN_SUCCESS",
+         payload: {
+           token: response.data.token,
+           otp: response.data.otp,
+           phone: "",
+           email,
+           loginMethod: "email",
+         },
        });
      } else {
+       // For phone, we don't save token yet,
+       // but we might need to pass it to OTP screen or store it in context without the 'token' field being set to trigger navigation
+       dispatch({
+         type: "SET_PENDING_AUTH",
+         payload: {
+           token: response.data.token,
+           otp: response.data.otp,
+           phone: fullPhone,
+           email: "",
+           loginMethod: "phone",
+         },
+       });
+
        navigation.navigate(
          "OTP"
        );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import {
   createNativeStackNavigator,
@@ -16,30 +16,47 @@ from "./MainTabs";
 import { RootStackParamList }
 from "../types/navigation";
 
+import { AuthContext } from "../context/authContext";
+import { ActivityIndicator, View } from "react-native";
+import { Colors } from "../theme/colors";
+
 const Stack =
   createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
+  const { state } = useContext(AuthContext);
+
+  if (state.isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.background }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
     >
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-      />
-
-      <Stack.Screen
-        name="OTP"
-        component={OtpScreen}
-      />
-
-      <Stack.Screen
-        name="MainTabs"
-        component={MainTabs}
-      />
+      {state.token ? (
+        <Stack.Screen
+          name="MainTabs"
+          component={MainTabs}
+        />
+      ) : (
+        <>
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+          />
+          <Stack.Screen
+            name="OTP"
+            component={OtpScreen}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 }

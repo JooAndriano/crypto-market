@@ -38,6 +38,10 @@ import {
   verifyOtp,
 } from "../services/authService";
 
+import {
+  saveToken,
+} from "../utils/storage";
+
 type Props =
   NativeStackScreenProps<
     RootStackParamList,
@@ -48,7 +52,7 @@ export default function OtpScreen({
   navigation,
 }: Props) {
     const [loading, setLoading] = useState(false);
-     const { state } = useContext(AuthContext);
+     const { state, dispatch } = useContext(AuthContext);
      const [otp, setOtp] = useState(state.otp);
 
 async function handleVerify() {
@@ -59,33 +63,29 @@ async function handleVerify() {
       state.loginMethod ===
       "email"
     ) {
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name:
-                "MainTabs",
-            },
-          ],
-        });
-
-      return;
+        // This case might not be reachable if we only go to OTP for phone
+        return;
     }
+
+    const tokenToUse = state.token || state.tempToken;
 
     await verifyOtp(
       otp,
       state.phone,
-      state.token!
+      tokenToUse!
     );
 
-    navigation.reset({
-      index: 0,
-      routes: [
-        {
-          name:
-            "MainTabs",
-        },
-      ],
+    await saveToken(tokenToUse!);
+
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: {
+        token: tokenToUse!,
+        otp: state.otp,
+        phone: state.phone,
+        email: state.email,
+        loginMethod: state.loginMethod,
+      },
     });
 
   } catch (error: any) {
