@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 
 import {
   StyleSheet,
@@ -11,6 +11,15 @@ import {
   SafeAreaView,
 } from "react-native-safe-area-context";
 
+import {
+  loginByEmail,
+  loginByPhone,
+} from "../services/authService";
+
+import {
+  saveToken,
+} from "../utils/storage";
+
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import AppButton from "../components/AppButton";
@@ -18,6 +27,15 @@ import AppInput from "../components/AppInput";
 
 import { RootStackParamList } from "../types/navigation";
 import { Colors } from "../theme/colors";
+import { AuthContext } from "../context/authContext";
+import CountryCode from "../components/CountryCode";
+import { Country } from "../types/country";
+import {
+  getCountries,
+} from "../services/countryService";
+import CountryPickerModal from "../components/CountryPickerModal";
+import { countryFlags }
+from "../utils/countryFlags";
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -27,6 +45,31 @@ type Props = NativeStackScreenProps<
 export default function LoginScreen({
   navigation,
 }: Props) {
+    useEffect(() => {
+      loadCountries();
+    }, []);
+
+    async function loadCountries() {
+      try {
+        const data =
+          await getCountries();
+
+           console.log(
+             JSON.stringify(data, null, 2)
+           );
+
+        setCountries(data);
+
+        if (data.length > 0) {
+          setSelectedCountry(
+            data[0]
+          );
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
   const [isEmail, setIsEmail] =
     useState(false);
 
@@ -39,8 +82,125 @@ export default function LoginScreen({
   const [password, setPassword] =
     useState("");
 
-  const [showPassword, setShowPassword] =
+  const [showPassword,
+    setShowPassword] =
     useState(false);
+
+  const [errors,
+    setErrors] =
+    useState<
+      Record<
+        string,
+        string
+      >
+    >({});
+
+  const {
+    dispatch,
+  } = useContext(
+    AuthContext
+  );
+
+  const [countries,
+    setCountries] =
+    useState<Country[]>(
+      []
+    );
+
+  const [showCountries,
+    setShowCountries] =
+    useState(false);
+
+const [selectedCountry,
+  setSelectedCountry] =
+  useState<Country>({
+    name: "Indonesia",
+    code: "ID",
+    dial_code: "+62",
+  });
+
+const countryCode =
+  selectedCountry.dial_code.replace(
+    /\+/g,
+    ""
+  );
+
+const fullPhone =
+  `${countryCode}${phone}`;
+
+ async function handleLogin() {
+   try {
+     let response;
+
+     if (isEmail) {
+       response =
+         await loginByEmail(
+           email,
+           password
+         );
+     } else {
+       response =
+         await loginByPhone(
+           fullPhone,
+           password
+         );
+     }
+
+     await saveToken(
+       response.data.token
+     );
+
+     dispatch({
+       type: "LOGIN_SUCCESS",
+       payload: {
+         token: response.data.token,
+         otp: response.data.otp,
+         phone: isEmail
+           ? ""
+           : fullPhone,
+         email,
+         loginMethod: isEmail
+           ? "email"
+           : "phone",
+       },
+     });
+     console.log("SAVED STATE");
+
+     console.log({
+       phone: isEmail
+         ? ""
+         : fullPhone,
+       email,
+       otp: response.data.otp,
+     });
+
+     console.log(
+       JSON.stringify(
+         response.data,
+         null,
+         2
+       )
+     );
+     console.log({
+       phone: fullPhone,
+       otp:
+         response.data.otp,
+       token:
+         response.data.token,
+     });
+     if (isEmail) {
+       navigation.replace(
+         "Market"
+       );
+     } else {
+       navigation.navigate(
+         "OTP"
+       );
+     }
+   } catch (error) {
+     console.log(error);
+   }
+ }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,14 +235,32 @@ export default function LoginScreen({
             placeholder="username@gmail.com"
             onChangeText={setEmail}
             keyboardType="email-address"
+            error={errors.email}
           />
         ) : (
-          <AppInput
-            value={phone}
-            placeholder="Enter your number"
-            onChangeText={setPhone}
-            keyboardType="number-pad"
-          />
+            <AppInput
+              value={phone}
+              placeholder="Enter your phone number"
+              onChangeText={setPhone}
+              keyboardType="number-pad"
+              leftComponent={
+                <CountryCode
+                  flag={
+                    countryFlags[
+                      selectedCountry.code
+                    ]
+                  }
+                  dialCode={
+                    selectedCountry.dial_code
+                  }
+                  onPress={() =>
+                    setShowCountries(
+                      true
+                    )
+                  }
+                />
+              }
+            />
         )}
 
         <View style={styles.passwordSection}>
@@ -113,6 +291,7 @@ export default function LoginScreen({
             placeholder="Enter your password"
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            error={errors.password}
           />
         </View>
 
@@ -123,14 +302,27 @@ export default function LoginScreen({
         <View style={styles.buttonContainer}>
           <AppButton
             title="Sign In"
-            onPress={() =>
-              navigation.navigate(
-                "OTP"
-              )
-            }
+            onPress={handleLogin}
           />
         </View>
       </View>
+      <CountryPickerModal
+        visible={
+          showCountries
+        }
+        countries={
+          countries
+        }
+        onClose={() =>
+          setShowCountries(
+            false
+          )
+        }
+        onSelect={country => {
+          setSelectedCountry(country);
+          setPhone("");
+        }}
+      />
     </SafeAreaView>
   );
 }

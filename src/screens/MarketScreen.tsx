@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   FlatList,
@@ -18,9 +18,14 @@ import CryptoCard from "../components/CryptoCard";
 import EmptyState from "../components/EmptyState";
 
 import { Colors } from "../theme/colors";
-import { mockCrypto } from "../utils/mockCrypto";
+import { CryptoCurrency } from "../types/crypto";
+import { getMarket } from "../services/marketServices";
 
 export default function MarketScreen() {
+    useEffect(() => {
+      fetchMarket();
+    }, []);
+
   const [search, setSearch] =
     useState("");
 
@@ -30,7 +35,7 @@ export default function MarketScreen() {
 
   const filteredData =
     useMemo(() => {
-      return mockCrypto.filter(
+      return market.filter(
         item => {
           const searchMatch =
             item.name
@@ -63,6 +68,27 @@ export default function MarketScreen() {
       search,
       selectedTab,
     ]);
+
+    const [loading,
+      setLoading] =
+      useState(true);
+
+    const [market,
+      setMarket] =
+      useState<
+        CryptoCurrency[]
+      >([]);
+
+ async function fetchMarket() {
+   try {
+     const data =
+       await getMarket();
+
+     setMarket(data);
+   } finally {
+     setLoading(false);
+   }
+ }
 
   return (
     <SafeAreaView

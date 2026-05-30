@@ -1,10 +1,14 @@
-import { useState } from "react";
+import React, {
+  useContext,
+  useState,
+} from "react";
 
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
 import {
@@ -27,6 +31,13 @@ from "../components/OTPInput";
 import AppButton
 from "../components/AppButton";
 
+import { AuthContext }
+from "../context/authContext";
+
+import {
+  verifyOtp,
+} from "../services/authService";
+
 type Props =
   NativeStackScreenProps<
     RootStackParamList,
@@ -36,8 +47,50 @@ type Props =
 export default function OtpScreen({
   navigation,
 }: Props) {
-  const [otp, setOtp] =
-    useState("");
+    const [loading, setLoading] = useState(false);
+     const { state } = useContext(AuthContext);
+     const [otp, setOtp] = useState(state.otp);
+
+async function handleVerify() {
+  try {
+    setLoading(true);
+
+    if (
+      state.loginMethod ===
+      "email"
+    ) {
+      navigation.replace(
+        "Market"
+      );
+
+      return;
+    }
+
+    await verifyOtp(
+      otp,
+      state.phone,
+      state.token!
+    );
+
+    navigation.replace(
+      "Market"
+    );
+  } catch (error: any) {
+      console.log("VERIFY BODY", {
+        otp,
+        phone: state.phone,
+      });
+
+    Alert.alert(
+      "Error",
+      error?.response?.data
+        ?.message ??
+        "Invalid OTP"
+    );
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <SafeAreaView
@@ -84,10 +137,11 @@ export default function OtpScreen({
           Enter the code sent to
         </Text>
 
-        <Text
-          style={styles.phone}
-        >
-          +62 8123456789
+        <Text style={styles.phone}>
+          {state.loginMethod ===
+          "phone"
+            ? state.phone
+            : state.email}
         </Text>
 
         <View
@@ -123,12 +177,12 @@ export default function OtpScreen({
           }
         >
           <AppButton
-            title="Verify Your Number"
-            onPress={() =>
-              navigation.replace(
-                "Market"
-              )
-            }
+           title={
+             loading
+              ? "Loading..."
+              : "Verify Your Number"
+           }
+           onPress={handleVerify}
           />
         </View>
       </View>
