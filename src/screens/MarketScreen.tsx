@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 
 import {
   FlatList,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -20,11 +21,11 @@ import EmptyState from "../components/EmptyState";
 import { Colors } from "../theme/colors";
 import { CryptoCurrency } from "../types/crypto";
 import { getMarket } from "../services/marketServices";
+import { AuthContext } from "../context/authContext";
 
 export default function MarketScreen() {
-    useEffect(() => {
-      fetchMarket();
-    }, []);
+    const { state } =
+       useContext(AuthContext);
 
   const [search, setSearch] =
     useState("");
@@ -33,25 +34,79 @@ export default function MarketScreen() {
     setSelectedTab] =
     useState("all");
 
+  const [loading,
+    setLoading] =
+    useState(true);
+
+  const [market,
+    setMarket] =
+    useState<CryptoCurrency[]>([]);
+
+  useEffect(() => {
+    fetchMarket();
+  }, []);
+
+ async function fetchMarket() {
+   try {
+     const data =
+       await getMarket(
+         state.token!
+       );
+
+     console.log(
+       "MARKET RESPONSE"
+     );
+
+     console.log(
+       JSON.stringify(
+         data,
+         null,
+         2
+       )
+     );
+
+     setMarket(
+       Array.isArray(data)
+         ? data
+         : []
+     );
+   } catch (error: any) {
+     console.log(
+       "MARKET ERROR"
+     );
+
+     console.log(
+       JSON.stringify(
+         error?.response?.data,
+         null,
+         2
+       )
+     );
+
+     setMarket([]);
+   } finally {
+     setLoading(false);
+   }
+ }
+
   const filteredData =
     useMemo(() => {
       return market.filter(
         item => {
           const searchMatch =
             item.name
-              .toLowerCase()
+              ?.toLowerCase()
               .includes(
                 search.toLowerCase()
               ) ||
             item.symbol
-              .toLowerCase()
+              ?.toLowerCase()
               .includes(
                 search.toLowerCase()
               );
 
           const tabMatch =
-            selectedTab ===
-            "all"
+            selectedTab === "all"
               ? true
               : selectedTab ===
                 "favorite"
@@ -65,30 +120,10 @@ export default function MarketScreen() {
         }
       );
     }, [
+      market,
       search,
       selectedTab,
     ]);
-
-    const [loading,
-      setLoading] =
-      useState(true);
-
-    const [market,
-      setMarket] =
-      useState<
-        CryptoCurrency[]
-      >([]);
-
- async function fetchMarket() {
-   try {
-     const data =
-       await getMarket();
-
-     setMarket(data);
-   } finally {
-     setLoading(false);
-   }
- }
 
   return (
     <SafeAreaView
@@ -162,8 +197,12 @@ export default function MarketScreen() {
           </ScrollView>
         </View>
 
-        {filteredData.length ===
-        0 ? (
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+          />
+        ) : filteredData.length ===
+          0 ? (
           <EmptyState
             keyword={search}
           />
@@ -172,8 +211,8 @@ export default function MarketScreen() {
             data={
               filteredData
             }
-            keyExtractor={
-              item => item.id
+            keyExtractor={item =>
+              item.id
             }
             showsVerticalScrollIndicator={
               false
