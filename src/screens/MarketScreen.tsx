@@ -7,7 +7,17 @@ import {
   Text,
   View,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
+
+import {
+  useNavigation,
+  NavigationProp,
+} from "@react-navigation/native";
+
+import {
+  RootStackParamList,
+} from "../types/navigation";
 
 import {
   SafeAreaView,
@@ -22,9 +32,10 @@ import { Colors } from "../theme/colors";
 import { CryptoCurrency } from "../types/crypto";
 import { getMarket } from "../services/marketServices";
 import { AuthContext } from "../context/authContext";
+import { removeToken } from "../utils/storage";
 
 export default function MarketScreen() {
-    const { state } =
+    const { state, dispatch } =
        useContext(AuthContext);
 
   const [search, setSearch] =
@@ -41,6 +52,11 @@ export default function MarketScreen() {
   const [market,
     setMarket] =
     useState<CryptoCurrency[]>([]);
+
+  const navigation =
+    useNavigation<
+      NavigationProp<RootStackParamList>
+    >();
 
   useEffect(() => {
     fetchMarket();
@@ -88,6 +104,23 @@ export default function MarketScreen() {
      setLoading(false);
    }
  }
+
+async function handleLogout() {
+  await removeToken();
+
+  dispatch({
+    type: "LOGOUT",
+  });
+
+  navigation.reset({
+    index: 0,
+    routes: [
+      {
+        name: "Login",
+      },
+    ],
+  });
+}
 
  const filteredData = useMemo(() => {
    return market.filter(item => {
@@ -236,6 +269,14 @@ export default function MarketScreen() {
           />
         )}
       </View>
+      <TouchableOpacity
+        style={styles.logoutFab}
+        onPress={handleLogout}
+      >
+        <Text>
+          ⎋
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -266,4 +307,27 @@ const styles =
       marginTop: 16,
       marginBottom: 20,
     },
-  });
+    logoutFab: {
+      position: "absolute",
+
+      right: 24,
+      bottom: 24,
+
+      width: 56,
+      height: 56,
+
+      borderRadius: 28,
+
+      justifyContent:
+        "center",
+
+      alignItems:
+        "center",
+
+      backgroundColor:
+        Colors.primary,
+
+      elevation: 4,
+    },
+  },
+);
